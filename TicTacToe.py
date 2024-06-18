@@ -28,7 +28,7 @@ def event_grabber():
                 quit()
 
 
-def display():
+def get_player_move():
     global turn, board, move
 
     def cmp(var, val1=200, val2=400):
@@ -112,7 +112,7 @@ def ttt_ai():
     while won == '':
         event_grabber()
         if turn == 'X':
-            display()
+            get_player_move()
             board[move] = 'X'
             turn = 'O'
         else:
