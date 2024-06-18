@@ -46,16 +46,19 @@ def play_games(threads):
 if __name__ == '__main__':
     # I have an AMD Ryzen 9 7900X with 12 cores and 24 threads and 64GB of RAM.
     # LOWER THIS NUMBER SIGNIFICANTLY IF YOU HAVE LESS RESOURCES.
-    num_games = 1_000_000_000
+    num_games = 10_000_000
 
     start_time = time.time()
     results = play_games(num_games)
     end_time = time.time()
 
     winners = [result[0] for result in results]
-    print(f'AI Won: {winners.count("O")}\nLost {winners.count("X")}\nTied {winners.count("Tie!")}')
+    print(f'Won: {winners.count("O")} - Lost {winners.count("X")} - Tied {winners.count("Tie!")}')
 
-    games_x_won = [result[1] for result in results if result[0] == 'X']
-    print(f'X\'s moves in games it won: {games_x_won}')
+    if winners.count('X') > 0:
+        games_x_won = [result[1] for result in results if result[0] == 'X']
+        print(f'X\'s moves in games it won: {games_x_won}')
+    else:
+        print('Seems pretty unbeatable!')
 
     print(f'Tested {num_games} games in {datetime.timedelta(seconds=end_time - start_time)}')
