@@ -3,38 +3,26 @@ import multiprocessing
 import random
 import time
 
-import rewrite
+import engine
 
 
 def play_game(game_id):
-    board, turn, won = rewrite.initialize_game()
     x_turns = []
 
-    while won == '':
-        if turn == 'X':
-            valid_moves = [i for i, space in enumerate(board) if space == ' ']
+    game_engine = engine.Engine()
+
+    while game_engine.won == '':
+        if game_engine.turn == 'X':
+            valid_moves = [i for i, space in enumerate(game_engine.board) if space == ' ']
             move = random.choice(valid_moves)
             x_turns.append(move)
-
-            board[move] = 'X'
-            turn = 'O'
         else:
-            if 'O' not in board:
-                move = 4 if board[4] == ' ' else 0
-            else:
-                won, move = rewrite.check_for_win(board)
-                if won == '':
-                    if move == -1:
-                        move = rewrite.get_next_best_move(board)
-                        if move == -1:
-                            move = board.index(' ') if ' ' in board else -1
-                            won = 'Tie!' if move == -1 else ''
-            if won == '':
-                board[move] = 'O'
-                turn = 'X'
+            move = game_engine.ai_turn(True)
 
-        won, _ = rewrite.check_for_win(board)
-    return won, x_turns
+        game_engine.board[move] = game_engine.turn
+        game_engine.turn = 'O' if game_engine.turn == 'X' else 'X'
+        game_engine.check_for_end()
+    return game_engine.won, x_turns
 
 
 def play_games(threads):

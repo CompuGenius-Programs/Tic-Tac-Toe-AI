@@ -8,40 +8,45 @@ def initialize_game():
     return board, turn, won
 
 
-def check_for_win(board):
+def check_for_win(board, let='', num=3):
     won = ''
-    position = -1
+    pos = -1
 
     for win in wins:
-        line = [board[i] for i in win]
-        if line.count('X') == 3:
-            won = 'X'
-            break
-        elif line.count('O') == 3:
-            won = 'O'
-            break
-    if won == '':
-        for win in wins:
-            line = [board[i] for i in win]
-            if line.count('O') == 2 and ' ' in line:
-                position = win[line.index(' ')]
+        count_x, count_o, count_n = 0, 0, 0
+        for box in win:
+            if board[box] == 'O':
+                count_o += 1
+            elif board[box] == 'X':
+                count_x += 1
+            else:
+                count_n += 1
+        if num == 3:
+            if count_x == 3:
+                won = 'X'
+            if count_o == 3:
+                won = 'O'
+            if won != '':
                 break
-    if won == '' and position == -1:
-        for win in wins:
-            line = [board[i] for i in win]
-            if line.count('X') == 2 and ' ' in line:
-                position = win[line.index(' ')]
-                break
-
+        else:
+            count = count_x if let == 'X' else count_o
+            if count == num and count_n:
+                pos = win[[board[n] for n in win].index(' ')] + 1
+                return won, pos
     if won == '' and ' ' not in board:
         won = 'Tie!'
-    return won, position
+
+    return won, pos
 
 
 def get_next_best_move(board):
     box_wins = [0 for _ in range(9)]
     pos = 0
-    o_wins = [win for win in wins if 'O' in [board[box] for box in win] and 'X' not in [board[box] for box in win]]
+    o_wins = []
+    for win in wins:
+        board_array = [board[box] for box in win]
+        if 'O' in board_array and 'X' not in board_array:
+            o_wins.append(win)
     for win in o_wins:
         for box in win:
             for row in wins:
@@ -50,39 +55,43 @@ def get_next_best_move(board):
     if box_wins == box_wins[::-1] and 2 in box_wins:
         box_wins = [(box_wins[n] if box_wins[n] != 2 else 0) for n in range(9)]
     if box_wins != [0 for _ in range(9)]:
-        pos = box_wins.index(max(box_wins))
+        pos = box_wins.index(max(box_wins)) + 1
     return pos
 
 
-def game_turn(board, turn, won):
+def game_turn(board, turn):
     if turn == 'X':
         move = get_player_turn(board)
         board[move] = 'X'
         turn = 'O'
     else:
         if 'O' not in board:
-            move = 4 if board[4] == ' ' else 0
+            move = 4
+            if board[4] == 'X':
+                move = 0
             print("Got move from \"first move\"")
         else:
-            won, move = check_for_win(board)
-            if won == '':
+            for letter in ['O', 'X']:
+                won, move = check_for_win(board, letter, 2)
                 if move != -1:
-                    print("Got move from \"check_for_win\"")
-                else:
-                    move = get_next_best_move(board)
-                    if move != -1:
-                        print("Got move from \"get_next_best_move\"")
-                    else:
-                        move = board.index(' ') if ' ' in board else -1
-                        print("Got move from \"last empty space\"")
-                        won = 'Tie!' if move == -1 else ''
-        if won == '':
+                    break
+            if move != -1:
+                move -= 1
+                print("Got move from \"check_for_win\"")
+            move = get_next_best_move(board)
+            if move != 0:
+                move -= 1
+                print("Got move from \"get_next_best_move\"")
+            elif ' ' in board:
+                move = board.index(' ')
+                print("Got move from \"last empty space\"")
+        if move >= 0:
             board[move] = 'O'
-            turn = 'X'
+        turn = 'X'
 
     won, _ = check_for_win(board)
     if won == '':
-        game_turn(board, turn, won)
+        game_turn(board, turn)
     else:
         display(board)
         print(f'{won} won!' if won != 'Tie!' else 'It\'s a Tie!')
@@ -112,7 +121,7 @@ def display(board):
 
 def main():
     board, turn, won = initialize_game()
-    game_turn(board, turn, won)
+    game_turn(board, turn)
 
 
 if __name__ == '__main__':
