@@ -7,13 +7,13 @@ class NewEngine(base_engine.BaseEngine):
 
         for win in self.wins:
             line = [self.board[i] for i in win]
-            if line.count('O') == 2 and ' ' in line:
+            if line.count(self.playing_as) == 2 and ' ' in line:
                 position = win[line.index(' ')]
                 break
         if position == -1:
             for win in self.wins:
                 line = [self.board[i] for i in win]
-                if line.count('X') == 2 and ' ' in line:
+                if line.count('X' if self.playing_as == 'O' else 'O') == 2 and ' ' in line:
                     position = win[line.index(' ')]
                     break
 
@@ -22,11 +22,13 @@ class NewEngine(base_engine.BaseEngine):
     def get_next_best_move(self):
         box_wins = [0 for _ in range(9)]
         pos = 0
-        o_wins = [win for win in self.wins if 'O' in [self.board[box] for box in win] and 'X' not in [self.board[box] for box in win]]
-        for win in o_wins:
+        possible_wins = [win for win in self.wins if self.playing_as in [self.board[box] for box in win] and (
+            'X' if self.playing_as == 'O' else 'O') not in [self.board[box] for box in win]]
+        for win in possible_wins:
             for box in win:
                 for row in self.wins:
-                    if box in row and 'X' in [self.board[n] for n in row] and self.board[box] == ' ':
+                    if box in row and ('X' if self.playing_as == 'O' else 'O') in [self.board[n] for n in row] and \
+                            self.board[box] == ' ':
                         box_wins[box] += 1
         if box_wins == box_wins[::-1] and 2 in box_wins:
             box_wins = [(box_wins[n] if box_wins[n] != 2 else 0) for n in range(9)]
@@ -35,7 +37,7 @@ class NewEngine(base_engine.BaseEngine):
         return pos
 
     def ai_turn(self, testing=False):
-        if 'O' not in self.board:
+        if self.playing_as not in self.board:
             move = 4 if self.board[4] == ' ' else 0
             if not testing:
                 print("Got move from \"first move\"")

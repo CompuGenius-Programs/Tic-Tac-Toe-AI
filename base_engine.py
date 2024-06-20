@@ -2,6 +2,7 @@ class BaseEngine:
     def __init__(self):
         self.wins = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
         self.board = [' ' for _ in range(9)]
+        self.playing_as = 'O'
         self.turn = 'X'
         self.won = ''
 
@@ -44,10 +45,10 @@ class BaseEngine:
         return move
 
     def game_turn(self):
-        if self.turn == 'X':
-            move = self.player_turn()
-        else:
+        if self.turn == self.playing_as:
             move = self.ai_turn()
+        else:
+            move = self.player_turn()
 
         self.board[move] = self.turn
         self.turn = 'O' if self.turn == 'X' else 'X'
